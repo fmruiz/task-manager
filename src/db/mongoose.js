@@ -33,13 +33,30 @@ const User = mongoose.model('User', {
             }
         },
     },
+    password: {
+        type: String,
+        required: true,
+        trim: true,
+        validate(value) {
+            if (value.length < 6) {
+                throw new Error('Password must be greater than 6 characters');
+            }
+
+            if (value.includes('password')) {
+                throw new Error('Password should not contains password word');
+            }
+        },
+    },
 });
 
 const Task = mongoose.model('Task', {
     description: {
         type: String,
+        required: true,
+        trim: true,
     },
     completed: {
         type: Boolean,
+        default: false,
     },
 });
