@@ -1,14 +1,15 @@
 const express = require('express');
+const userRouter = require('./routers/user');
+const connectDB = require('./db/mongoose');
 /**
- *
+ * Models
  */
 const Task = require('./models/task');
-const User = require('./models/user');
 
 /**
  * Initialize DB
  */
-require('./db/mongoose');
+connectDB();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,79 +19,10 @@ const port = process.env.PORT || 3000;
  */
 app.use(express.json());
 
-app.get('/users', async (req, res) => {
-    try {
-        const users = await User.find({});
-        res.send(users);
-    } catch (error) {
-        console.log(`Error ==> ${error}`);
-        res.status(500).send(error);
-    }
-});
-
-app.get('/users/:id', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const user = await User.findById(id);
-
-        if (!user) {
-            return res
-                .status(404)
-                .send({ message: 'User not found!', status: 404 });
-        }
-
-        res.send(user);
-    } catch (error) {
-        console.log(`Error ==> ${error}`);
-        res.status(500).send(error);
-    }
-});
-
-app.post('/users', async (req, res) => {
-    const user = new User(req.body);
-
-    try {
-        await user.save();
-        res.send(user);
-    } catch (error) {
-        console.log(`Error ==> ${error}`);
-        res.status(400).send(error);
-    }
-});
-
-app.patch('/users/:id', async (req, res) => {
-    const { id } = req.params;
-
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'email', 'password', 'age'];
-    const isValidOperation = updates.every((x) => allowedUpdates.includes(x));
-
-    if (!isValidOperation) {
-        return res.status(400).send({
-            message: 'Invalid operation! Please check yours fields',
-            status: 400,
-        });
-    }
-
-    try {
-        const userUpdated = await User.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true,
-        });
-
-        if (!userUpdated) {
-            return res
-                .status(404)
-                .send({ message: 'User not found!', status: 404 });
-        }
-
-        res.send(userUpdated);
-    } catch (error) {
-        console.log(`Error ==> ${error}`);
-        res.status(400).send(error);
-    }
-});
+/**
+ * Routes
+ */
+app.use(userRouter);
 
 app.get('/tasks', async (req, res) => {
     try {
@@ -170,7 +102,7 @@ app.delete('/tasks/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const taskDeleted = Task.findByIdAndDelete(id);
+        const taskDeleted = await Task.findByIdAndDelete(id);
 
         if (!taskDeleted) {
             return res
