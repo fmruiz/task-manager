@@ -1,4 +1,7 @@
 const express = require('express');
+/**
+ *
+ */
 const Task = require('./models/task');
 const User = require('./models/user');
 
@@ -71,18 +74,18 @@ app.patch('/users/:id', async (req, res) => {
     }
 
     try {
-        const user = await User.findByIdAndUpdate(id, req.body, {
+        const userUpdated = await User.findByIdAndUpdate(id, req.body, {
             new: true,
             runValidators: true,
         });
 
-        if (!user) {
+        if (!userUpdated) {
             return res
                 .status(404)
                 .send({ message: 'User not found!', status: 404 });
         }
 
-        res.send(user);
+        res.send(userUpdated);
     } catch (error) {
         console.log(`Error ==> ${error}`);
         res.status(400).send(error);
@@ -138,12 +141,10 @@ app.patch('/tasks/:id', async (req, res) => {
     const isValidOperation = updates.every((x) => allowedUpdates.includes(x));
 
     if (!isValidOperation) {
-        return res
-            .status(400)
-            .send({
-                message: 'Invalid operation! Please check yours fields',
-                status: 400,
-            });
+        return res.status(400).send({
+            message: 'Invalid operation! Please check yours fields',
+            status: 400,
+        });
     }
 
     try {
@@ -159,6 +160,25 @@ app.patch('/tasks/:id', async (req, res) => {
         }
 
         res.send(taskUpdated);
+    } catch (error) {
+        console.log(`Error ==> ${error}`);
+        res.status(500).send(error);
+    }
+});
+
+app.delete('/tasks/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const taskDeleted = Task.findByIdAndDelete(id);
+
+        if (!taskDeleted) {
+            return res
+                .status(404)
+                .send({ message: 'Task not found!', status: 404 });
+        }
+
+        res.send(taskDeleted);
     } catch (error) {
         console.log(`Error ==> ${error}`);
         res.status(500).send(error);
