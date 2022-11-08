@@ -56,6 +56,39 @@ app.post('/users', async (req, res) => {
     }
 });
 
+app.patch('/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ['name', 'email', 'password', 'age'];
+    const isValidOperation = updates.every((x) => allowedUpdates.includes(x));
+
+    if (!isValidOperation) {
+        return res.status(400).send({
+            message: 'Invalid operation! Please check yours fields',
+            status: 400,
+        });
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        if (!user) {
+            return res
+                .status(404)
+                .send({ message: 'User not found!', status: 404 });
+        }
+
+        res.send(user);
+    } catch (error) {
+        console.log(`Error ==> ${error}`);
+        res.status(400).send(error);
+    }
+});
+
 app.get('/tasks', async (req, res) => {
     try {
         const tasks = await Task.find({});
@@ -94,6 +127,41 @@ app.post('/tasks', async (req, res) => {
     } catch (error) {
         console.log(`Error ==> ${error}`);
         res.status(400).send(error);
+    }
+});
+
+app.patch('/tasks/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ['description', 'completed'];
+    const isValidOperation = updates.every((x) => allowedUpdates.includes(x));
+
+    if (!isValidOperation) {
+        return res
+            .status(400)
+            .send({
+                message: 'Invalid operation! Please check yours fields',
+                status: 400,
+            });
+    }
+
+    try {
+        const taskUpdated = await Task.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        if (!taskUpdated) {
+            return res
+                .status(404)
+                .send({ message: 'Task not found!', status: 404 });
+        }
+
+        res.send(taskUpdated);
+    } catch (error) {
+        console.log(`Error ==> ${error}`);
+        res.status(500).send(error);
     }
 });
 
