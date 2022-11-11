@@ -81,6 +81,20 @@ exports.updateUserById = async (req, res) => {
     }
 };
 
+exports.loginUser = async (req, res) => {
+    try {
+        const user = await User.findByCredentials(
+            req.body.email,
+            req.body.password
+        );
+
+        res.send(user);
+    } catch (error) {
+        console.log(`Error ==> ${error}`);
+        res.status(401).send(error);
+    }
+};
+
 exports.deleteUserById = async (req, res) => {
     const { id } = req.params;
 
