@@ -62,10 +62,11 @@ exports.updateUserById = async (req, res) => {
     }
 
     try {
-        const userUpdated = await User.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true,
-        });
+        const userUpdated = await User.findById(id);
+
+        updates.forEach((update) => (userUpdated[update] = req.body[update]));
+
+        await userUpdated.save();
 
         if (!userUpdated) {
             return res
