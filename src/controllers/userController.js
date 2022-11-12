@@ -39,8 +39,10 @@ exports.createUser = async (req, res) => {
     const user = new User(req.body);
 
     try {
+        const token = await user.generateAuthToken();
+
         await user.save();
-        res.send(user);
+        res.send({ user, token });
     } catch (error) {
         console.log(`Error ==> ${error}`);
         res.status(400).send(error);
@@ -88,7 +90,9 @@ exports.loginUser = async (req, res) => {
             req.body.password
         );
 
-        res.send(user);
+        const token = await user.generateAuthToken();
+
+        res.send({ user, token });
     } catch (error) {
         console.log(`Error ==> ${error}`);
         res.status(401).send(error);
